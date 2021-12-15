@@ -30,7 +30,7 @@ impl Default for Root {
       seed: 1337,
       planted_time: now,
       last_watered_time: now,
-      ..Default::default()
+      tree: Default::default(),
     }
   }
 }

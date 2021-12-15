@@ -6,5 +6,5 @@ Grow a pet tree in your terminal.
 
 ## Usage
 * `cargo install --path .`
-* `roots plant`
+* `roots plant myTree`
 * `roots view`
