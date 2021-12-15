@@ -1,4 +1,3 @@
-use dirs;
 use roots::Root;
 use std::fs::File;
 use std::io::BufReader;

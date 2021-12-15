@@ -38,8 +38,8 @@ impl Default for Root {
 impl Root {
   pub fn new(name: String, seed: u64) -> Self {
     Self {
-      name: name,
-      seed: seed,
+      name,
+      seed,
       ..Default::default()
     }
   }
@@ -105,7 +105,7 @@ impl Root {
     branch: &mut Branch,
     branch_count: &mut u8,
   ) {
-    const max_branches: u8 = 100;
+    const MAX_BRANCHES: u8 = 100;
 
     let mut step = 0;
 
@@ -143,7 +143,7 @@ impl Root {
         b.branch_type = BranchType::Stem;
         self.grow_rec(leaf_count as u64, rng, &mut b, branch_count);
       } else if matches!(branch.branch_type, BranchType::GrowingNorth)
-        && *branch_count < max_branches
+        && *branch_count < MAX_BRANCHES
       {
         let r = rng.gen_range(0..=10);
         let rr = rng.gen_range(0..=100);
@@ -288,23 +288,18 @@ fn calc_direction(branch: &mut Branch, rng: &mut StdRng) {
         if r <= 2 {
           branch.direction = branch.direction.turn(angle[t]);
         }
-      } else {
-        if r <= 7 {
-          branch.direction = branch.direction.turn(angle[t]);
-        }
+      } else if r <= 7 {
+        branch.direction = branch.direction.turn(angle[t]);
       }
     }
-
     BranchType::GrowingWest => {
       // Heavily favor leftwards movement
       if branch.direction.is_moving_west() {
         if r <= 2 {
           branch.direction = branch.direction.turn(angle[t]);
         }
-      } else {
-        if r <= 8 {
-          branch.direction = branch.direction.turn(angle[t]);
-        }
+      } else if r <= 8 {
+        branch.direction = branch.direction.turn(angle[t]);
       }
     }
     BranchType::GrowingEast => {
@@ -313,10 +308,8 @@ fn calc_direction(branch: &mut Branch, rng: &mut StdRng) {
         if r <= 2 {
           branch.direction = branch.direction.turn(angle[t]);
         }
-      } else {
-        if r <= 8 {
-          branch.direction = branch.direction.turn(angle[t]);
-        }
+      } else if r <= 8 {
+        branch.direction = branch.direction.turn(angle[t]);
       }
     }
     BranchType::Stem => {
@@ -325,10 +318,8 @@ fn calc_direction(branch: &mut Branch, rng: &mut StdRng) {
         if r <= 4 {
           branch.direction = branch.direction.turn(angle[t]);
         }
-      } else {
-        if r <= 6 {
-          branch.direction = branch.direction.turn(angle[t]);
-        }
+      } else if r <= 6 {
+        branch.direction = branch.direction.turn(angle[t]);
       }
     }
     BranchType::Leaf => {
@@ -337,10 +328,8 @@ fn calc_direction(branch: &mut Branch, rng: &mut StdRng) {
         if r <= 2 {
           branch.direction = branch.direction.turn(angle[t]);
         }
-      } else {
-        if r <= 8 {
-          branch.direction = branch.direction.turn(angle[t]);
-        }
+      } else if r <= 8 {
+        branch.direction = branch.direction.turn(angle[t]);
       }
     }
   }
