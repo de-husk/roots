@@ -76,12 +76,12 @@ impl Root {
   }
 
   fn grow(&mut self, steps: u64) {
-    //let seed = self.seed;
+    let seed = self.seed;
     // TODO: Make this a flag to use the seed or use random seed each time
-    let seed = SystemTime::now()
-      .duration_since(SystemTime::UNIX_EPOCH)
-      .unwrap()
-      .as_secs();
+    //let seed = SystemTime::now()
+    //  .duration_since(SystemTime::UNIX_EPOCH)
+    //  .unwrap()
+    //  .as_secs();
     let mut r = StdRng::seed_from_u64(seed);
     let step_limit = if steps > MAX_STEPS { MAX_STEPS } else { steps };
 
