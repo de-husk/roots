@@ -9,12 +9,12 @@ use std::time::SystemTime;
 const TREE_WIDTH: usize = 100;
 const TREE_HEIGHT: usize = 40;
 // when grow() reaches max_steps it will stop computing new values (this is capped so there is a maximum tree age)
-const MAX_STEPS: u64 = 70;
+const MAX_STEPS: u64 = 60;
 
 #[derive(Serialize, Deserialize)]
 pub struct Root {
-    name: String,
-    seed: u64,
+    pub name: String,
+    pub seed: u64,
     planted_time: SystemTime,
     last_watered_time: SystemTime,
 
@@ -45,43 +45,25 @@ impl Root {
     }
 
     // Deterministically generate a tree based on the starting seed and time elapsed
-    pub fn generate(&mut self) {
+    pub fn generate(&mut self) -> &Vec<Vec<TreeCell>> {
         //growth_rate_secs is how long we have to wait for another step to be computed by grow()
         let growth_rate_secs = Duration::new(1, 0).as_secs();
 
         let elapsed = SystemTime::now().duration_since(self.planted_time).unwrap();
         let steps = elapsed.as_secs() / growth_rate_secs;
 
-        //println!("Time since planting: {:?}", elapsed);
-
         self.grow(steps);
 
-        // TODO: Move this printing to main.rs and just return a str or a list of strs here
-
-        // Print tree:
-        for row in self.tree.t.iter().rev() {
-            for cell in row.iter() {
-                print!("{}", cell.ch);
-            }
-            println!();
-        }
-
-        // Print grass:
-        println!(
-            "{}",
-            "\t\t\t\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~".bright_green()
-        );
-        // TODO: Actually center this text with whitespace padding based on `TREE_WIDTH`
-        println!("\t\t\t\t\t\t \"{}\"", self.name.cyan());
+        return self.tree.t.as_ref();
     }
 
     fn grow(&mut self, steps: u64) {
         let seed = self.seed;
         // TODO: Make this a flag to use the seed or use random seed each time
-        //let seed = SystemTime::now()
-        //      .duration_since(SystemTime::UNIX_EPOCH)
-        //      .unwrap()
-        //      .as_secs();
+        // let seed = SystemTime::now()
+        //     .duration_since(SystemTime::UNIX_EPOCH)
+        //     .unwrap()
+        //    .as_secs();
         let mut r = StdRng::seed_from_u64(seed);
         let step_limit = if steps > MAX_STEPS { MAX_STEPS } else { steps };
 
@@ -105,7 +87,7 @@ impl Root {
         branch: &mut Branch,
         branch_count: &mut u8,
     ) {
-        const MAX_BRANCHES: u8 = 100;
+        const MAX_BRANCHES: u8 = 10;
 
         let mut step = 0;
 
@@ -114,9 +96,9 @@ impl Root {
 
             let pct_done: f32 = step as f32 / max_step as f32;
             let leaf_count = if branch.pos.y < 10 {
-                rng.gen_range(1..=2)
+                rng.gen_range(1..=15)
             } else {
-                rng.gen_range(branch.pos.y / 2..=branch.pos.y * 5)
+                rng.gen_range(branch.pos.y / 2..=branch.pos.y)
             };
 
             if matches!(branch.branch_type, BranchType::GrowingNorth)
@@ -337,7 +319,7 @@ fn calc_direction(branch: &mut Branch, rng: &mut StdRng) {
     }
 }
 
-struct Tree {
+pub struct Tree {
     t: Vec<Vec<TreeCell>>,
 }
 
@@ -350,8 +332,8 @@ impl Default for Tree {
 }
 
 #[derive(Clone)]
-struct TreeCell {
-    ch: colored::ColoredString,
+pub struct TreeCell {
+    pub ch: colored::ColoredString,
 }
 
 #[derive(Clone, Debug)]
