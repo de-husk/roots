@@ -13,7 +13,7 @@ fn main() {
         match cmd.as_str() {
             "plant" => plant(args.get(2)),
             "water" => water(),
-            "view" => view(),
+            "view" => view(args.get(2)),
             "help" => help(),
             _ => {
                 println!("Error: Unknown command {}. See `roots help`", cmd);
@@ -60,7 +60,7 @@ fn plant(name: Option<&String>) {
     println!("Be patient and watch it grow.");
 }
 
-fn view() {
+fn view(rand_seed_flag: Option<&String>) {
     let mut path = dirs::home_dir().expect("Error $HOME not set");
     path.push(".roots");
     path.push("root_0");
@@ -69,6 +69,15 @@ fn view() {
     let reader = BufReader::new(file);
 
     let mut r: Root = serde_json::from_reader(reader).unwrap();
+
+    if let Some(flag) = rand_seed_flag {
+        if flag == "rand" {
+            r.seed = SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_secs();
+        }
+    }
 
     for row in r.generate().iter().rev() {
         for cell in row.iter() {
@@ -82,6 +91,7 @@ fn view() {
         "\t\t\t\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~".bright_green()
     );
     println!("\t\t\t\t\t\t \"{}\"", r.name.cyan());
+    println!("\t\t\t\t\t   Seed: {}", r.seed.to_string().red());
 }
 
 fn help() {}

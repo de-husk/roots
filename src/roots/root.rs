@@ -8,6 +8,7 @@ use std::time::SystemTime;
 // TODO: Ensure width is not larger than terminal width: https://docs.rs/term_size/0.3.2/term_size/
 const TREE_WIDTH: usize = 100;
 const TREE_HEIGHT: usize = 40;
+
 // when grow() reaches max_steps it will stop computing new values (this is capped so there is a maximum tree age)
 const MAX_STEPS: u64 = 60;
 
@@ -58,13 +59,7 @@ impl Root {
     }
 
     fn grow(&mut self, steps: u64) {
-        let seed = self.seed;
-        // TODO: Make this a flag to use the seed or use random seed each time
-        // let seed = SystemTime::now()
-        //     .duration_since(SystemTime::UNIX_EPOCH)
-        //     .unwrap()
-        //    .as_secs();
-        let mut r = StdRng::seed_from_u64(seed);
+        let mut r = StdRng::seed_from_u64(self.seed);
         let step_limit = if steps > MAX_STEPS { MAX_STEPS } else { steps };
 
         let mut trunk = Branch {
