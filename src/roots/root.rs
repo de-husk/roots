@@ -48,7 +48,7 @@ impl Root {
     // Deterministically generate a tree based on the starting seed and time elapsed
     pub fn generate(&mut self) -> &Vec<Vec<TreeCell>> {
         //growth_rate_secs is how long we have to wait for another step to be computed by grow()
-        let growth_rate_secs = Duration::new(1, 0).as_secs();
+        let growth_rate_secs = Duration::new(60 * 7, 0).as_secs();
 
         let elapsed = SystemTime::now().duration_since(self.planted_time).unwrap();
         let steps = elapsed.as_secs() / growth_rate_secs;
