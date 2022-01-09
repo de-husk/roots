@@ -79,6 +79,7 @@ fn view(rand_seed_flag: Option<&String>) {
         }
     }
 
+    // print tree:
     for row in r.generate().iter().rev() {
         for cell in row.iter() {
             print!("{}", cell.ch);
@@ -86,12 +87,17 @@ fn view(rand_seed_flag: Option<&String>) {
         println!();
     }
 
-    println!(
-        "{}",
-        "\t\t\t\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~".bright_green()
-    );
-    println!("\t\t\t\t\t\t \"{}\"", r.name.cyan());
-    println!("\t\t\t\t\t   Seed: {}", r.seed.to_string().red());
+    // print grass:
+    let grass = vec!["~"; r.tree.width];
+    for c in grass {
+        print!("{}", c.bright_green());
+    }
+    println!();
+
+    // TODO: Center this text around width while still supporting really small terminal widthed screens
+    let buffer = vec![" "; r.tree.width / 2].join("");
+    println!("{}\"{}\"", buffer, r.name.cyan());
+    println!("{}Seed: {}", buffer, r.seed.to_string().red());
 }
 
 fn help() {}

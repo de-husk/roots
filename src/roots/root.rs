@@ -5,10 +5,6 @@ use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use std::time::SystemTime;
 
-// TODO: Ensure width is not larger than terminal width: https://docs.rs/term_size/0.3.2/term_size/
-const TREE_WIDTH: usize = 100;
-const TREE_HEIGHT: usize = 40;
-
 // when grow() reaches max_steps it will stop computing new values (this is capped so there is a maximum tree age)
 const MAX_STEPS: u64 = 60;
 
@@ -20,7 +16,7 @@ pub struct Root {
     last_watered_time: SystemTime,
 
     #[serde(skip)]
-    tree: Tree,
+    pub tree: Tree,
 }
 
 impl Default for Root {
@@ -55,7 +51,7 @@ impl Root {
 
         self.grow(steps);
 
-        return self.tree.t.as_ref();
+        self.tree.t.as_ref()
     }
 
     fn grow(&mut self, steps: u64) {
@@ -64,7 +60,7 @@ impl Root {
 
         let mut trunk = Branch {
             pos: Position {
-                x: TREE_WIDTH / 2,
+                x: self.tree.width / 2,
                 y: 0,
             },
             direction: Direction::North,
@@ -97,7 +93,7 @@ impl Root {
             };
 
             if matches!(branch.branch_type, BranchType::GrowingNorth)
-                && branch.pos.y > TREE_HEIGHT - 5
+                && branch.pos.y > self.tree.height - 5
             {
                 branch.branch_type = BranchType::Stem;
                 let mut b = branch.clone();
@@ -133,7 +129,7 @@ impl Root {
                     let ts = [BranchType::GrowingWest, BranchType::GrowingEast];
                     b.branch_type = ts[r % 2];
 
-                    let mut len = if branch.pos.y < TREE_HEIGHT / 2 {
+                    let mut len = if branch.pos.y < self.tree.height / 2 {
                         rng.gen_range(50..100)
                     } else {
                         rng.gen_range(10..25)
@@ -152,7 +148,7 @@ impl Root {
             // Grow into new cell:
             calc_direction(branch, rng);
 
-            let new_pos = calc_position(branch);
+            let new_pos = calc_position(branch, self.tree.width, self.tree.height);
             match new_pos {
                 Some(pos) => {
                     branch.pos.x = pos.x;
@@ -166,12 +162,12 @@ impl Root {
     }
 }
 
-fn calc_position(branch: &Branch) -> Option<Position> {
+fn calc_position(branch: &Branch, tree_width: usize, tree_height: usize) -> Option<Position> {
     // Returns None if Position would be outside of tree grid bounds
 
     match branch.direction {
         Direction::North => {
-            if branch.pos.y == TREE_HEIGHT - 1 {
+            if branch.pos.y == tree_height - 1 {
                 None
             } else {
                 Some(Position {
@@ -181,7 +177,7 @@ fn calc_position(branch: &Branch) -> Option<Position> {
             }
         }
         Direction::NorthEast => {
-            if branch.pos.y == TREE_HEIGHT - 1 || branch.pos.x == TREE_WIDTH - 1 {
+            if branch.pos.y == tree_height - 1 || branch.pos.x == tree_width - 1 {
                 None
             } else {
                 Some(Position {
@@ -191,7 +187,7 @@ fn calc_position(branch: &Branch) -> Option<Position> {
             }
         }
         Direction::East => {
-            if branch.pos.x == TREE_WIDTH - 1 {
+            if branch.pos.x == tree_width - 1 {
                 None
             } else {
                 Some(Position {
@@ -202,7 +198,7 @@ fn calc_position(branch: &Branch) -> Option<Position> {
         }
 
         Direction::SouthEast => {
-            if branch.pos.x == TREE_WIDTH - 1 || branch.pos.y == 0 {
+            if branch.pos.x == tree_width - 1 || branch.pos.y == 0 {
                 None
             } else {
                 Some(Position {
@@ -242,7 +238,7 @@ fn calc_position(branch: &Branch) -> Option<Position> {
             }
         }
         Direction::NorthWest => {
-            if branch.pos.x == 0 || branch.pos.y == TREE_HEIGHT - 1 {
+            if branch.pos.x == 0 || branch.pos.y == tree_height - 1 {
                 None
             } else {
                 Some(Position {
@@ -316,13 +312,35 @@ fn calc_direction(branch: &mut Branch, rng: &mut StdRng) {
 
 pub struct Tree {
     t: Vec<Vec<TreeCell>>,
+    pub width: usize,
+    pub height: usize,
+}
+
+impl Tree {
+    pub fn new() -> Self {
+        let (width, height) = Self::calc_dimensions();
+
+        Self {
+            width,
+            height,
+            t: vec![vec![TreeCell { ch: " ".black() }; width]; height],
+        }
+    }
+
+    fn calc_dimensions() -> (usize, usize) {
+        // TODO: put lower and upper bounds on the acceptable terminal window sizes
+        if let Some((w, h)) = term_size::dimensions() {
+            (w - 20, h)
+        } else {
+            // Cant determine terminal dimensions, use defaults
+            (100, 40)
+        }
+    }
 }
 
 impl Default for Tree {
     fn default() -> Self {
-        Self {
-            t: vec![vec![TreeCell { ch: " ".black() }; TREE_WIDTH]; TREE_HEIGHT],
-        }
+        Tree::new()
     }
 }
 
